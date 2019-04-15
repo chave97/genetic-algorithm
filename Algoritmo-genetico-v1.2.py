@@ -12,6 +12,7 @@ class Poblacion():
         self.max_func_obj=0
         self.min_func_obj=0
         self.prom_func_obj=0
+        self.seleccionados=[]
    
     def generar_poblacion(self):
         for cantpob in range(10):
@@ -31,12 +32,51 @@ class Poblacion():
         self.min_func_obj=min(func_obj)
         self.prom_func_obj=func_obj_sum/(len(self.poblacion))
 
+    def seleccion(self):
+        #Metodo de la ruleta
+        for giro in range(10):
+            suma=0
+            aleatorio = random.random()
+            for cromosoma in range(len(self.poblacion)):
+                suma+=self.poblacion[cromosoma].valor_fitness
+                if suma>=aleatorio:
+                    self.seleccionados+=[self.poblacion[cromosoma]]
+                    break
+        for cromosomas in self.seleccionados:
+            print("Se seleccionaron los cromosomas: "+str(''.join(cromosomas.contenido)))
+
+    def prob_cross(self):
+        rand=random.random()
+        prob=0.75
+        if rand<=prob:
+            return True
+        else:
+            return False
+    
+    def crossover(self):
+        indice=0
+        for pareja in range(5):
+            if self.prob_cross():
+                corte=random.randint(1,29)
+                print("Se corta en pos: "+str(corte))
+                padre1=self.seleccionados[indice]
+                print("Padre1: "+str(padre1.contenido))
+                padre2=self.seleccionados[indice+1]
+                print("Padre2: "+str(padre2.contenido))
+                parte_izquierda = [padre1.contenido[:corte]]+[padre2.contenido[:corte]]
+                parte_derecha = [padre1.contenido[corte:]]+[padre2.contenido[corte:]]
+                self.seleccionados[indice].contenido=[]+parte_izquierda[0]+parte_derecha[1]
+                self.seleccionados[indice+1].contenido=[]+parte_izquierda[1]+parte_derecha[0]
+                print("Padre1 cambiado: "+str(self.seleccionados[indice].contenido))
+                print("Padre2 cambiado: "+str(self.seleccionados[indice+1].contenido))
+                indice+=2
+                
 class Cromosoma():
     def __init__(self,contenido,valor_entero,valor_binario):
-        self.contenido=contenido                            #cromosoma
-        self.valor_entero=valor_entero                      #inicializo valor entero que representan los genes
-        self.valor_binario=valor_binario                    #inicializo valor binario que representan los genes (str)
-        self.valor_func_obj=0                               #inicializo valor de la funcion objetivo evaluada en el cromosoma
+        self.contenido=contenido                            #Cromosoma
+        self.valor_entero=valor_entero                      #Inicializo valor entero que representan los genes
+        self.valor_binario=valor_binario                    #Inicializo valor binario que representan los genes (str)
+        self.valor_func_obj=0                               #Inicializo valor de la funcion objetivo evaluada en el cromosoma
         self.valor_fitness=0
 
     def mostrar_contenido(self):                            #Muestra contenido del cromosoma
@@ -85,3 +125,5 @@ for cromosomas in range(len(pobla.poblacion)):
 
 print("Fitness total: ",suma_f_fit)
 escribir_archivo(pobla)
+pobla.seleccion()
+pobla.crossover()
