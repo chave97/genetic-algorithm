@@ -6,11 +6,23 @@ import csv
 FNC_OBJ = 2**30-1
 #-----------CLASES Y FUNCIONES------------
 
+class Poblacion():
+    def __init__(self):
+        self.poblacion=[]
+
+    def generar_poblacion(self):
+        for cantpob in range(10):
+            valor_gen_int=random.randint(0,FNC_OBJ)
+            valor_gen_bin=bin(valor_gen_int)[2:].zfill(30)
+            cromo=list(valor_gen_bin)
+            cromo1=Cromosoma(cromo,valor_gen_int,valor_gen_bin)
+            self.poblacion+=[cromo1]
+
 class Cromosoma():
     def __init__(self,contenido,valor_entero,valor_binario):
         self.contenido=contenido                            #cromosoma
-        self.valor_entero=0                                 #inicializo valor entero que representan los genes
-        self.valor_binario=0                                #inicializo valor binario que representan los genes (str)
+        self.valor_entero=valor_entero                                 #inicializo valor entero que representan los genes
+        self.valor_binario=valor_binario                                #inicializo valor binario que representan los genes (str)
         self.valor_func_obj=0                               #inicializo valor de la funcion objetivo evaluada en el cromosoma
         self.valor_fitness=0
 
@@ -28,18 +40,9 @@ class Cromosoma():
         f_obj=self.valor_func_obj
         self.valor_fitness = f_obj/suma_f_obj
 
-def Generar_poblacion(poblacion):
-    for cantpob in range(10):
-        valor_gen_int=random.randint(0,FNC_OBJ)
-        valor_gen_bin=bin(valor_gen_int)[2:0].zfill(30)
-        cromo=list(valor_gen_bin)
-        cromo1=Cromosoma(cromo,valor_gen_int,valor_gen_bin)
-        poblacion+=[cromo1]
-    return poblacion
+#----------------------------------------Programa Principal -------------------------------------------------
 
-pob=[]
-
-Generar_poblacion(pob)
-
-for cromosomas in pob:
-    cromosomas.mostrar_contenido()
+pobla=Poblacion()
+pobla.generar_poblacion()
+for cromosomas in pobla.poblacion:
+    print(cromosomas.contenido)
