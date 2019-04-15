@@ -34,8 +34,8 @@ class Poblacion():
 class Cromosoma():
     def __init__(self,contenido,valor_entero,valor_binario):
         self.contenido=contenido                            #cromosoma
-        self.valor_entero=valor_entero                                 #inicializo valor entero que representan los genes
-        self.valor_binario=valor_binario                                #inicializo valor binario que representan los genes (str)
+        self.valor_entero=valor_entero                      #inicializo valor entero que representan los genes
+        self.valor_binario=valor_binario                    #inicializo valor binario que representan los genes (str)
         self.valor_func_obj=0                               #inicializo valor de la funcion objetivo evaluada en el cromosoma
         self.valor_fitness=0
 
