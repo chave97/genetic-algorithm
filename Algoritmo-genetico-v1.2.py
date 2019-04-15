@@ -34,17 +34,20 @@ class Poblacion():
 
     def seleccion(self):
         #Metodo de la ruleta
+        indice=[]
         for giro in range(10):
             suma=0
             aleatorio = random.random()
             for cromosoma in range(len(self.poblacion)):
                 suma+=self.poblacion[cromosoma].valor_fitness
                 if suma>=aleatorio:
+                    indice+=[cromosoma]
                     self.seleccionados+=[self.poblacion[cromosoma]]
                     break
         for cromosomas in self.seleccionados:
             print("Se seleccionaron los cromosomas: "+str(''.join(cromosomas.contenido)))
-
+        print("Cromosomas seleccionados: "+str(indice))    
+    
     def prob_cross(self):
         rand=random.random()
         prob=0.75
@@ -60,17 +63,36 @@ class Poblacion():
                 corte=random.randint(1,29)
                 print("Se corta en pos: "+str(corte))
                 padre1=self.seleccionados[indice]
-                print("Padre1: "+str(padre1.contenido))
+                print("Padre1: "+''.join(padre1.contenido))
                 padre2=self.seleccionados[indice+1]
-                print("Padre2: "+str(padre2.contenido))
+                print("Padre2: "+''.join(padre2.contenido))
                 parte_izquierda = [padre1.contenido[:corte]]+[padre2.contenido[:corte]]
                 parte_derecha = [padre1.contenido[corte:]]+[padre2.contenido[corte:]]
                 self.seleccionados[indice].contenido=[]+parte_izquierda[0]+parte_derecha[1]
                 self.seleccionados[indice+1].contenido=[]+parte_izquierda[1]+parte_derecha[0]
-                print("Padre1 cambiado: "+str(self.seleccionados[indice].contenido))
-                print("Padre2 cambiado: "+str(self.seleccionados[indice+1].contenido))
+                print("Padre1 cambiado: "+''.join(self.seleccionados[indice].contenido))
+                print("Padre2 cambiado: "+''.join(self.seleccionados[indice+1].contenido))
                 indice+=2
-                
+            else:
+                print("La pareja {} no se reproducira!".format(pareja))
+
+    def mutacion(self):
+        for seleccionado in self.seleccionados:
+            muta=random.random()
+            if muta < 0.05:
+                corte=random.randint(1,29)
+                if seleccionado.contenido[corte] == '0':
+                    seleccionado.contenido[corte] == '1'
+                else:
+                    seleccionado.contenido[corte]== '0'
+            else:
+                mutacion=False
+                print("El cromosoma seleccionado: " +''.join(seleccionado.contenido) +"NO se reprodujo")
+    
+    def nueva_poblacion(self):
+        self.poblacion=[]+self.seleccionados
+
+
 class Cromosoma():
     def __init__(self,contenido,valor_entero,valor_binario):
         self.contenido=contenido                            #Cromosoma
@@ -94,11 +116,11 @@ class Cromosoma():
         self.valor_fitness = f_obj/suma_f_obj
     
 
-def escribir_archivo(poblacion):
+def escribir_archivo(poblacion,tirada):
     poblacion.calcular_max_min()
     cabecera=[["Ronda","Maximo","Minimo","Promedio"]]
-    cabecera.append(["0",str(poblacion.max_func_obj),str(poblacion.min_func_obj),str(poblacion.prom_func_obj)])
-    archivo=open("./registro.csv","w+")
+    cabecera.append([str(tirada),str(poblacion.max_func_obj),str(poblacion.min_func_obj),str(poblacion.prom_func_obj)])
+    archivo=open("./registro.csv","a")
     with archivo:
         escribir=csv.writer(archivo,dialect="excel",delimiter=';')
         escribir.writerows(cabecera)
@@ -106,24 +128,31 @@ def escribir_archivo(poblacion):
 
 pobla=Poblacion()
 pobla.generar_poblacion()
-f_obj=0
-suma_f_obj=0
-for cromosomas in range(len(pobla.poblacion)):
-    print("Cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].contenido))
-    print("Valor representativo entero: "+str(pobla.poblacion[cromosomas].valor_entero))
-    print("Valor representativo binario: "+str(pobla.poblacion[cromosomas].valor_binario))
-    pobla.poblacion[cromosomas].calcular_fobjetivo()
-    suma_f_obj+=pobla.poblacion[cromosomas].valor_func_obj
-    print("Valor de funcion objetivo: "+str(pobla.poblacion[cromosomas].valor_func_obj))
+for tiradas in range(20):
+    f_obj=0
+    suma_f_obj=0
+    for cromosomas in range(len(pobla.poblacion)):
+        print("Cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].contenido))
+        print("Valor representativo entero: "+str(pobla.poblacion[cromosomas].valor_entero))
+        print("Valor representativo binario: "+str(pobla.poblacion[cromosomas].valor_binario))
+        pobla.poblacion[cromosomas].calcular_fobjetivo()
+        suma_f_obj+=pobla.poblacion[cromosomas].valor_func_obj
+        print("Valor de funcion objetivo: "+str(pobla.poblacion[cromosomas].valor_func_obj))
 
-print(suma_f_obj)
-suma_f_fit=0
-for cromosomas in range(len(pobla.poblacion)):
-    pobla.poblacion[cromosomas].calcular_fitness(suma_f_obj)
-    print("Valor fitness del cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].valor_fitness))
-    suma_f_fit+=pobla.poblacion[cromosomas].valor_fitness
+    print(suma_f_obj)
+    suma_f_fit=0
+    for cromosomas in range(len(pobla.poblacion)):
+        pobla.poblacion[cromosomas].calcular_fitness(suma_f_obj)
+        print("Valor fitness del cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].valor_fitness))
+        suma_f_fit+=pobla.poblacion[cromosomas].valor_fitness
 
-print("Fitness total: ",suma_f_fit)
-escribir_archivo(pobla)
-pobla.seleccion()
-pobla.crossover()
+    print("Fitness total: ",suma_f_fit)
+    pobla.seleccion()
+    pobla.crossover()
+    print("-----------------------------------------")
+    for p in range(len(pobla.poblacion)):
+        print(str(pobla.poblacion[p].contenido))
+    pobla.nueva_poblacion()
+    print("--------------------------------")
+    for p in range(len(pobla.poblacion)):
+        print(str(pobla.poblacion[p].contenido))
