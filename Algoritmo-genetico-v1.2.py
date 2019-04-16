@@ -13,6 +13,7 @@ class Poblacion():
         self.min_func_obj=0
         self.prom_func_obj=0
         self.seleccionados=[]
+        self.suma_objet=0
    
     def generar_poblacion(self):
         for cantpob in range(10):
@@ -21,7 +22,25 @@ class Poblacion():
             cromo=list(valor_gen_bin)
             cromo1=Cromosoma(cromo,valor_gen_int,valor_gen_bin)
             self.poblacion+=[cromo1]
-   
+    
+    def calcular_fobjetivo(self):                           #Calculo de función objetivo
+        for cromosoma in self.poblacion:
+            entero=cromosoma.valor_entero
+            cromosoma.valor_func_obj=entero/(FNC_OBJ)**2
+    
+    def suma_de_objetivo(self):
+        for cromosoma in self.poblacion:
+            self.suma_objet+=cromosoma.valor_func_obj
+
+    def calcular_fitness(self):                  #Calculo fitness, pasando como parametro la suma de las funciones objetivos de la poblacion
+        for cromosoma in self.poblacion:
+            f_obj=cromosoma.valor_func_obj
+            cromosoma.valor_fitness = f_obj/self.suma_objet
+    
+    def mostrar_contenido(self):                            #Muestra contenido del cromosoma
+        for cromosoma in range(len(self.poblacion)):
+            print("Cromosoma {}: ".format(cromosoma)+''.join(self.poblacion[cromosoma].contenido))
+    
     def calcular_max_min(self):
         func_obj=[]
         func_obj_sum=0
@@ -100,20 +119,6 @@ class Cromosoma():
         self.valor_binario=valor_binario                    #Inicializo valor binario que representan los genes (str)
         self.valor_func_obj=0                               #Inicializo valor de la funcion objetivo evaluada en el cromosoma
         self.valor_fitness=0
-
-    def mostrar_contenido(self):                            #Muestra contenido del cromosoma
-        print(self.contenido)
-
-    def agregar_gen(self,gen):                              #Agrega gen al cromosoma
-        self.contenido+=[gen]
-
-    def calcular_fobjetivo(self):                           #Calculo de función objetivo
-        entero=self.valor_entero
-        self.valor_func_obj=entero/(FNC_OBJ)**2
-
-    def calcular_fitness(self,suma_f_obj):                  #Calculo fitness, pasando como parametro la suma de las funciones objetivos de la poblacion
-        f_obj=self.valor_func_obj
-        self.valor_fitness = f_obj/suma_f_obj
     
 
 def escribir_archivo(poblacion,tirada):
@@ -128,31 +133,24 @@ def escribir_archivo(poblacion,tirada):
 
 pobla=Poblacion()
 pobla.generar_poblacion()
-for tiradas in range(20):
-    f_obj=0
-    suma_f_obj=0
-    for cromosomas in range(len(pobla.poblacion)):
-        print("Cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].contenido))
-        print("Valor representativo entero: "+str(pobla.poblacion[cromosomas].valor_entero))
-        print("Valor representativo binario: "+str(pobla.poblacion[cromosomas].valor_binario))
-        pobla.poblacion[cromosomas].calcular_fobjetivo()
-        suma_f_obj+=pobla.poblacion[cromosomas].valor_func_obj
-        print("Valor de funcion objetivo: "+str(pobla.poblacion[cromosomas].valor_func_obj))
-
-    print(suma_f_obj)
-    suma_f_fit=0
-    for cromosomas in range(len(pobla.poblacion)):
-        pobla.poblacion[cromosomas].calcular_fitness(suma_f_obj)
-        print("Valor fitness del cromosoma {}: ".format(cromosomas)+str(pobla.poblacion[cromosomas].valor_fitness))
-        suma_f_fit+=pobla.poblacion[cromosomas].valor_fitness
-
-    print("Fitness total: ",suma_f_fit)
+print("-"*40+"Poblacion inicial"+"-"*40)
+pobla.mostrar_contenido()
+print("-"*100)
+for tiradas in range(1):
+    print("-"*40+"Tirada {}".format(tiradas)+"-"*40)
+    #Calculo funcion objetivo de c/cromosoma
+    pobla.calcular_fobjetivo()
+    #Sumo la funcion objetivo de todos los cromosomas
+    pobla.suma_de_objetivo()
+    #Calculo fitness de c/cromosoma
+    pobla.calcular_fitness()
+    pobla.mostrar_contenido()
+    print("-"*100)
+    pobla.calcular_max_min()
     pobla.seleccion()
     pobla.crossover()
-    print("-----------------------------------------")
-    for p in range(len(pobla.poblacion)):
-        print(str(pobla.poblacion[p].contenido))
+    pobla.mutacion()
     pobla.nueva_poblacion()
-    print("--------------------------------")
-    for p in range(len(pobla.poblacion)):
-        print(str(pobla.poblacion[p].contenido))
+    print("-"*40+"Poblacion nueva"+"-"*40)
+    pobla.mostrar_contenido()
+    print("-"*100)
